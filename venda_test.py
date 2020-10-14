@@ -263,12 +263,14 @@ def test_valor_irrelevante():
 
 ##
 
+DATA_HORA = "11/11/11 11:11:11V"
+
 venda_com_produtos_datahora_sample = Venda(
     loja_completa,
     CCF,
     COO,
     [item1_sample, item2_sample],
-    "11/11/11 11:11:11V"
+    DATA_HORA
 )
 
 HIFENS = "-" * 30
@@ -282,12 +284,12 @@ CEP:{CEP} Tel {TELEFONE}
 CNPJ: {CNPJ}
 IE: {INSCRICAO_ESTADUAL}
 {HIFENS} 
-11/11/11 11:11:11V CCF:{CCF} COO:{COO}
+{DATA_HORA} CCF:{CCF} COO:{COO}
      CUPOM FISCAL     
 ITEM CODIGO DESCRICAO QTD UN VL UNIT(R$) ST VL ITEM(R$)
 1 {CODIGO1} {DESCRICAO1} {QTD} {UNIDADE} {VU1:.2f} {ST} {VU1*QTD:.2f}
 2 {CODIGO2} {DESCRICAO2} {QTD} {UNIDADE} {VU2:.2f} {ST} {VU2*QTD:.2f}
-------------------------------
+{HIFENS}
 TOTAL: R$ 6.22"""
 
 def test_impressao_cupom():
