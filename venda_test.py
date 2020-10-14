@@ -33,38 +33,68 @@ def valida_impressao(mensagem_esperada, venda):
 
 ##
 
+# @Endereco
+LOGRADOURO = "Rua 1"
+NUMERO = 11
+COMPLEMENTO = "Complemento 1"
+BAIRRO = "Bairro 1"
+MUNICIPIO = "Município 1"
+ESTADO = "Estado 1"
+CEP = "11111-111"
+
+# @Loja
+NOME_LOJA = "Loja 1"
+TELEFONE = "(11)1111-1111"
+OBSERVACAO = "Observacao 1"
+CNPJ = "987654321"
+INSCRICAO_ESTADUAL = "123456789"
+
+# @Venda
+DATA_HORA = "11/11/11 11:11:11V"
+CCF = "123456"
+COO = "123456"
+
+QUANTIDADE = QTD = 2
+UNIDADE= UND = "R$"
+SUBSTITUICAO_TRIBUTARIA = ST = "ST" 
+
+# @Produto produto1
+CODIGO1 = "001"
+DESCRICAO1 = "Maçã"
+VALOR_UNITARIO1 = VU1 = 1.11
+
+# @Produto produto2
+CODIGO2 = "002"
+DESCRICAO2 = "Banana"
+VALOR_UNITARIO2 = VU2 = 2
+
 endereco_completo = Endereco(
-    "Rua 1", 
-    11, 
-    "Complemento 1", 
-    "Bairro 1", 
-    "Município 1", 
-    "Estado 1", 
-    "Cep 1"
+    LOGRADOURO, 
+    NUMERO, 
+    COMPLEMENTO, 
+    BAIRRO, 
+    MUNICIPIO, 
+    ESTADO, 
+    CEP
 )
 
 loja_completa = Loja(
-    "Loja 1",
+    NOME_LOJA,
     endereco_completo,
-    "(11)1111-1111",
-    "Observacao 1",
-    "987654321",
-    "123456789"
+    TELEFONE,
+    OBSERVACAO,
+    CNPJ,
+    INSCRICAO_ESTADUAL
 )
 
 loja_com_erros = Loja(
     "",
     endereco_completo,
-    "(11)1111-1111",
-    "Observacao 1",
-    "987654321",
-    "123456789"
+    TELEFONE,
+    OBSERVACAO,
+    CNPJ,
+    INSCRICAO_ESTADUAL
 )
-
-##
-
-COO = "123456"
-CCF = "123456"
 
 ##
 
@@ -106,35 +136,49 @@ venda_com_coo_vazio = Venda(
 
 ##
 
-produto_sample = Produto(
-    0o1, 
-    "Maçã", 
-    "R$", 
-    11.11, 
-    "ST"
+produto1_sample = Produto(
+    CODIGO1, 
+    DESCRICAO1, 
+    UNIDADE, 
+    VALOR_UNITARIO1, 
+    SUBSTITUICAO_TRIBUTARIA
+)
+
+produto2_sample = Produto(
+    CODIGO2, 
+    DESCRICAO2, 
+    UNIDADE, 
+    VALOR_UNITARIO2, 
+    SUBSTITUICAO_TRIBUTARIA
 )
 
 produto_gratuito = Produto(
-    0o1, 
-    "Maçã", 
-    "R$", 
+    CODIGO1, 
+    DESCRICAO1, 
+    UNIDADE, 
     0, 
-    "ST"
+    SUBSTITUICAO_TRIBUTARIA
 )
 
-item_sample = ItemVenda(
+item1_sample = ItemVenda(
     1,
-    produto_sample,
-    2
+    produto1_sample,
+    QUANTIDADE
+)
+
+item2_sample = ItemVenda(
+    2,
+    produto2_sample,
+    QUANTIDADE
 )
 
 ##
 
-venda_com_um_produto = Venda(
+venda_com_produtos = Venda(
     loja_completa,
     CCF,
     COO,
-    [item_sample]
+    [item1_sample, item2_sample]
 )
 
 ##
@@ -196,8 +240,8 @@ def test_sem_itens():
 def test_item_duplicado():
     valida_item_adicionado(
         MSG_ERR_ITEM_DUPLICADO, 
-        venda_com_um_produto,
-        produto_sample,
+        venda_com_produtos,
+        produto1_sample,
         1
     )
 
@@ -205,7 +249,7 @@ def test_quantidade_menor_que_um():
     valida_item_adicionado(
         MSG_ERR_QUANTIDADE, 
         venda_sem_itens,
-        produto_sample,
+        produto1_sample,
         0
     )
 
@@ -218,3 +262,34 @@ def test_valor_irrelevante():
     )
 
 ##
+
+venda_com_produtos_datahora_sample = Venda(
+    loja_completa,
+    CCF,
+    COO,
+    [item1_sample, item2_sample],
+    "11/11/11 11:11:11V"
+)
+
+HIFENS = "-" * 30
+
+TEXTO_ESPERADO_CUPOM_FISCAL_DOIS_ITENS = \
+f"""{NOME_LOJA}
+{LOGRADOURO}, {NUMERO} {COMPLEMENTO}
+{BAIRRO} - {MUNICIPIO} - {ESTADO}
+CEP:{CEP} Tel {TELEFONE}
+{OBSERVACAO}
+CNPJ: {CNPJ}
+IE: {INSCRICAO_ESTADUAL}
+{HIFENS} 
+11/11/11 11:11:11V CCF:{CCF} COO:{COO}
+     CUPOM FISCAL     
+ITEM CODIGO DESCRICAO QTD UN VL UNIT(R$) ST VL ITEM(R$)
+1 {CODIGO1} {DESCRICAO1} {QTD} {UNIDADE} {VU1:.2f} {ST} {VU1*QTD:.2f}
+2 {CODIGO2} {DESCRICAO2} {QTD} {UNIDADE} {VU2:.2f} {ST} {VU2*QTD:.2f}
+------------------------------
+TOTAL: R$ 6.22"""
+
+def test_impressao_cupom():
+    assert venda_com_produtos_datahora_sample.imprimir_cupom() == \
+    TEXTO_ESPERADO_CUPOM_FISCAL_DOIS_ITENS

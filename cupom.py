@@ -116,11 +116,11 @@ class ItemVenda:
     return self.quantidade * self.produto.valor_unitario
 
   def dados_item(self) -> str:
-    return (
-      f"{self.item} {self.produto.codigo} {self.produto.descricao} " +
-      f"{self.quantidade} {self.produto.unidade} {self.produto.valor_unitario:.2f} " +
-      f"{self.produto.substituicao_tributaria} {self.valor_total:.2f}"
-    )
+
+    output = f"{self.item} {self.produto.codigo} {self.produto.descricao} "
+    output += f"{self.quantidade} {self.produto.unidade} {self.produto.valor_unitario:.2f} "
+    output += f"{self.produto.substituicao_tributaria} {self.valor_total():.2f}"
+    return output
 
 from datetime import datetime
 
@@ -146,12 +146,16 @@ class Venda:
     self.coo = coo
     self.datahora = datahora
     self.itens = itens
-    
+
+  ##
+
   def calcular_total(self):
     total = 0
     for item in self.itens:
-      total += item.valor_total
+      total += item.valor_total()
     return total
+
+  ##
 
   def validar_campos_obrigatorios(self) -> any:
     if not self.coo:
@@ -171,11 +175,15 @@ class Venda:
     except:
       raise Exception("Loja é um campo obrigatório. Insira uma loja válida.")
   
+  ##
+
   def is_duplicado(self, codigo) -> bool:
     for item in self.itens:
       if item.produto.codigo == codigo:
         return True
     return False
+
+  ##
 
   def validar_item_adicionado(
     self, 
@@ -190,7 +198,9 @@ class Venda:
 
     if self.is_duplicado(produto.codigo):
       raise Exception ("O produto já está na lista.")
-
+  
+  ##
+  
   def adicionar_item(
     self, 
     produto, 
@@ -200,10 +210,17 @@ class Venda:
 
     item = len(self.itens) + 1
     item_para_add = ItemVenda(item, produto, quantidade)
+    self.itens.append(item_para_add)
+
+  ##
 
   def dados_venda(self) -> str:
     self.validar_campos_obrigatorios()
+
+    return f"{self.datahora} CCF:{self.ccf} COO:{self.coo}"
     
+  ##
+
   def dados_itens(self) -> str:
     stringfy = ""
     for item in self.itens:
@@ -214,6 +231,8 @@ class Venda:
 
     return 'ITEM CODIGO DESCRICAO QTD UN VL UNIT(R$) ST VL ITEM(R$)\n' + stringfy
   
+  ##
+
   def imprimir_cupom(self) -> str:
     if len(self.itens) == 0:
       raise Exception ("Não há itens para imprimir.")
@@ -227,9 +246,9 @@ class Venda:
     return (
 f"""{dados_loja}
 {hifens} 
-{dados_venda} 
-     CUPOM FISCAL      
+{dados_venda}
+     CUPOM FISCAL     
 {dados_itens}
 {hifens}
-TOTAL: R$ {self.calcular_total()}"""
+TOTAL: R$ {self.calcular_total():.2f}"""
     )
